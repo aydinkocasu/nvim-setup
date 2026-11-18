@@ -1,11 +1,13 @@
 return {
 	{ -- Highlight, edit, and navigate code
 		"nvim-treesitter/nvim-treesitter",
+		branch = "master",
 		run = ":TSUpdate",
 		opts = {
 			ensure_installed = {
 				"bash",
 				"c",
+				"c_sharp",
 				"cpp",
 				"go",
 				"diff",

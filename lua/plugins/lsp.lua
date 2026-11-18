@@ -117,7 +117,7 @@ return {
 
 					-- When you move your cursor, the highlights will be cleared (the second autocommand).
 					local client = vim.lsp.get_client_by_id(event.data.client_id)
-					if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+					if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
 						local highlight_augroup =
 							vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
 						vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
@@ -147,11 +147,28 @@ return {
 			capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 			local servers = {
 				clangd = {},
+				omnisharp = {},
 				lua_ls = {
 					settings = {
 						Lua = {
-							completion = {
-								callSnippet = "Replace",
+							runtime = {
+								version = "LuaJIT",
+							},
+							diagnostics = {
+								globals = { "vim", "require" },
+							},
+							workspace = {
+								checkThirdParty = false,
+								library = {
+									vim.env.VIMRUNTIME,
+								},
+							},
+							codeLens = {
+								enable = true,
+							},
+							hint = {
+								enable = true,
+								semicolon = "Disable",
 							},
 						},
 					},
@@ -181,6 +198,18 @@ return {
 						local server = servers[server_name] or {}
 						server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
 						require("lspconfig")[server_name].setup(server)
+					end,
+					["omnisharp"] = function()
+						require("lspconfig").omnisharp.setup({
+							capabilities = capabilities,
+							cmd = {
+								"dotnet",
+								vim.fn.stdpath("data") .. "/mason/packages/omnisharp/libexec/OmniSharp.dll",
+							},
+							enable_roslyn_analyzers = true,
+							organize_imports_on_format = true,
+							enable_import_completion = true,
+						})
 					end,
 				},
 			})
